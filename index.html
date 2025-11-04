@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ lý Tạo Đề kiểm tra (Thông tư 27)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .prose {
+            max-width: none;
+        }
+        .prose h1, .prose h2, .prose h3 { margin-bottom: 0.5em; }
+        .prose p { margin-bottom: 0.5em; }
+        .prose ul, .prose ol { margin-bottom: 1em; padding-left: 1.5em; }
+        .prose ul li, .prose ol li { margin-bottom: 0.25em; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto max-w-5xl p-4 md:p-8">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <header class="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md">
+                <h1 class="text-3xl font-bold">Trợ lý Tạo Đề kiểm tra (Thông tư 27)</h1>
+                <p class="mt-2 text-blue-100">Dán ma trận đề của bạn và để AI tạo nội dung câu hỏi theo tinh thần Thông tư 27.</p>
+            </header>
+
+            <main class="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Input Section -->
+                <div class="space-y-6">
+                    <div>
+                        <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">Môn học:</label>
+                        <select id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option>Toán</option>
+                            <option>Tiếng Việt</option>
+                            <option>Công nghệ</option>
+                            <option>Lịch sử và Địa lý</option>
+                            <option>Khoa học</option>
+                            <option>Tin học</option>
+                            <option>Tiếng anh</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="grade" class="block text-sm font-semibold text-gray-700 mb-2">Lớp:</label>
+                        <select id="grade" name="grade" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option>Lớp 1</option>
+                            <option>Lớp 2</option>
+                            <option>Lớp 3</option>
+                            <option>Lớp 4</option>
+                            <option>Lớp 5</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="examFormat" class="block text-sm font-semibold text-gray-700 mb-2">Hình thức kiểm tra:</label>
+                        <select id="examFormat" name="examFormat" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option>Hỗn hợp (Trắc nghiệm + Tự luận)</option>
+                            <option>Trắc nghiệm</option>
+                            <option>Tự luận</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="topic" class="block text-sm font-semibold text-gray-700 mb-2">Chủ đề / Bài học (Tùy chọn):</label>
+                        <select id="topic" name="topic" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option>Giữa học kỳ I</option>
+                            <option>Cuối học kỳ I</option>
+                            <option>Giữa học kỳ II</option>
+                            <option>Cuối học kỳ II</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="questionCount" class="block text-sm font-semibold text-gray-700 mb-2">Tổng số câu (Tùy chọn):</label>
+                        <input type="number" id="questionCount" name="questionCount" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" placeholder="Ví dụ: 10">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="matrixInput" class="block text-sm font-semibold text-gray-700">Ma trận Đề kiểm tra:</label>
+                            
+                            <label for="fileUploader" class="text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer transition duration-200">
+                                Tải lên file (.txt)
+                                <input type="file" id="fileUploader" accept=".txt" class="hidden">
+                            </label>
+                        </div>
+                        <textarea id="matrixInput" rows="12" class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" placeholder="Dán ma trận vào đây, hoặc tải lên file .txt...
+Ví dụ:
+Phần 1: Trắc nghiệm (4 điểm) - 8 câu
+- Chủ đề A: 2 câu (Mức 1)
+- Chủ đề B: 4 câu (Mức 2)
+..."></textarea>
+                    </div>
+
+                    <button id="generateButton" class="w-full flex justify-center items-center px-6 py-4 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-105 duration-200">
+                        <svg id="loadingSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span id="buttonText">Tạo Đề kiểm tra</span>
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800">Kết quả Gợi ý:</h2>
+                        <div class="space-x-2">
+                            <button id="downloadButton" title="Tải file HTML (có thể mở bằng Word)" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200" disabled>
+                                Tải File (.html)
+                            </button>
+                            <button id="printButton" title="Print" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-200" disabled>
+                                In
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="messageBox" class="hidden p-4 rounded-lg"></div>
+
+                    <div id="resultsOutput" class="h-[450px] overflow-y-auto p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-inner">
+                        <div id="placeholder" class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p>Nội dung đề kiểm tra sẽ xuất hiện ở đây...</p>
+                        </div>
+                        <div id="generatedContent" class="prose prose-sm md:prose-base hidden"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const subjectEl = document.getElementById('subject');
+        const gradeEl = document.getElementById('grade');
+        const examFormatEl = document.getElementById('examFormat'); // Thêm dòng này
+        const topicEl = document.getElementById('topic');
+        const questionCountEl = document.getElementById('questionCount'); // Thêm dòng này
+        const matrixInputEl = document.getElementById('matrixInput');
+        const fileUploaderEl = document.getElementById('fileUploader'); // Thêm dòng này
+        const generateButtonEl = document.getElementById('generateButton');
+        const buttonTextEl = document.getElementById('buttonText');
+        const loadingSpinnerEl = document.getElementById('loadingSpinner');
+        
+        const resultsOutputEl = document.getElementById('resultsOutput');
+        const placeholderEl = document.getElementById('placeholder');
+        const generatedContentEl = document.getElementById('generatedContent');
+        
+        const downloadButtonEl = document.getElementById('downloadButton'); // Đã đổi
+        const printButtonEl = document.getElementById('printButton');
+        const messageBoxEl = document.getElementById('messageBox');
+
+        // --- Gemini API Configuration ---
+        const apiKey = ""; // Sẽ được Canvas tự động cung cấp
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        // --- Event Listeners ---
+        generateButtonEl.addEventListener('click', handleGenerateExam);
+        downloadButtonEl.addEventListener('click', handleDownload); // Đã đổi
+        printButtonEl.addEventListener('click', handlePrint);
+        fileUploaderEl.addEventListener('change', handleFileUpload); // Thêm dòng này
+
+        function showMessage(type, text) {
+            messageBoxEl.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (type === 'error') {
+                messageBoxEl.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                messageBoxEl.classList.add('bg-green-100', 'text-green-700');
+            }
+            messageBoxEl.textContent = text;
+            messageBoxEl.classList.remove('hidden');
+        }
+
+        // --- Thêm hàm xử lý file upload ---
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+            
+            if (!file.type.startsWith("text/")) {
+                showMessage('error', 'Chỉ hỗ trợ file văn bản (ví dụ: .txt).');
+                event.target.value = null; // Đặt lại input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                matrixInputEl.value = text;
+                showMessage('success', 'Đã tải nội dung file vào ô ma trận.');
+            };
+            reader.onerror = () => {
+                showMessage('error', 'Không thể đọc file.');
+            };
+            reader.readAsText(file);
+            
+            // Xóa giá trị của file input để cho phép tải lại cùng 1 file
+            event.target.value = null;
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                generateButtonEl.disabled = true;
+                loadingSpinnerEl.classList.remove('hidden');
+                buttonTextEl.textContent = 'Đang tạo...';
+            } else {
+                generateButtonEl.disabled = false;
+                loadingSpinnerEl.classList.add('hidden');
+                buttonTextEl.textContent = 'Tạo Đề kiểm tra';
+            }
+        }
+
+        function setOutput(content) {
+            placeholderEl.classList.add('hidden');
+            generatedContentEl.innerHTML = content; // Dùng innerHTML để render Markdown cơ bản
+            generatedContentEl.classList.remove('hidden');
+            downloadButtonEl.disabled = false; // Đã đổi
+            printButtonEl.disabled = false;
+        }
+
+        async function handleGenerateExam() {
+            const subject = subjectEl.value;
+            const grade = gradeEl.value;
+            const examFormat = examFormatEl.value; // Thêm dòng này
+            const topic = topicEl.value;
+            const questionCount = questionCountEl.value; // Thêm dòng này
+            const matrix = matrixInputEl.value;
+
+            if (!matrix.trim()) {
+                showMessage('error', 'Vui lòng nhập ma trận đề kiểm tra.');
+                return;
+            }
+
+            setLoading(true);
+            showMessage('success', 'Đang gửi yêu cầu... AI có thể mất vài giây để suy nghĩ.');
+
+            const systemPrompt = `Bạn là một trợ lý AI chuyên gia về giáo dục tiểu học tại Việt Nam, am hiểu sâu sắc Chương trình Giáo dục Phổ thông 2018 và Thông tư 27 của Bộ GD&ĐT. Nhiệm vụ của bạn là tạo ra các câu hỏi và đề kiểm tra bám sát ma trận do giáo viên cung cấp.
+- Đảm bảo các câu hỏi phù hợp với lứa tuổi và tâm lý học sinh tiểu học.
+- Bám sát các mức độ nhận thức (Mức 1: Nhận biết, Mức 2: Thông hiểu, Mức 3: Vận dụng, Mức 4: Vận dụng cao).
+- Trình bày kết quả dưới dạng một đề kiểm tra hoàn chỉnh, có thể bao gồm đáp án và hướng dẫn chấm điểm nếu hợp lý.
+- Sử dụng Google Search để tham khảo các dạng bài tập chuẩn và tinh thần của Thông tư 27.
+- Định dạng kết quả bằng Markdown (ví dụ: dùng **in đậm** cho tiêu đề, *in nghiêng* cho lưu ý, tạo danh sách).`;
+
+            // Cập nhật userQuery để bao gồm chủ đề, hình thức, số câu
+            const topicInfo = topic.trim() ? `Chủ đề/Bài học cụ thể: **${topic.trim()}**\n` : '';
+            const formatInfo = `Hình thức: **${examFormat}**\n`;
+            const countInfo = questionCount.trim() ? `Tổng số câu: **${questionCount.trim()}**\n` : '';
+
+            const userQuery = `Tạo một đề kiểm tra đầy đủ (bao gồm câu hỏi và có thể cả đáp án/hướng dẫn chấm) cho:
+- Môn học: **${subject}**
+- Lớp: **${grade}**
+${formatInfo}
+${topicInfo}
+${countInfo}
+Hãy tạo đề dựa theo đúng ma trận sau đây:
+
+--- MA TRẬN ---
+${matrix}
+--- KẾT THÚC MA TRẬN ---
+
+Hãy đảm bảo đề kiểm tra tuân thủ chặt chẽ ma trận và tinh thần của Thông tư 27.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                tools: [{ "google_search": {} }] // Bật Google Search
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const generatedText = candidate.content.parts[0].text;
+                    
+                    // Chuyển đổi Markdown cơ bản sang HTML
+                    let htmlContent = generatedText
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')   // Italic
+                        .replace(/^- (.*)/gm, '<ul><li>$1</li></ul>') // Unordered list
+                        .replace(/^\d+\. (.*)/gm, '<ol><li>$1</li></ol>') // Ordered list
+                        .replace(/<\/ul>\n<ul>/g, '') // Fix consecutive list items
+                        .replace(/<\/ol>\n<ol>/g, '') // Fix consecutive list items
+                        .replace(/\n/g, '<br>'); // Newlines
+
+                    setOutput(htmlContent);
+                    showMessage('success', 'Đã tạo đề kiểm tra thành công!');
+                } else {
+                    throw new Error("Không nhận được nội dung hợp lệ từ AI.");
+                }
+            } catch (error) {
+                console.error('Error generating exam:', error);
+                showMessage('error', `Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại.`);
+                setOutput(`<p class="text-red-500">Đã xảy ra lỗi. Vui lòng kiểm tra console log.</p>`);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function handleDownload() {
+            const htmlContent = generatedContentEl.innerHTML;
+            if (!htmlContent.trim()) {
+                showMessage('error', 'Không có nội dung để tải xuống.');
+                return;
+            }
+
+            // Tạo một file HTML đầy đủ với một số style cơ bản giống Word
+            const fullHtml = `
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Đề kiểm tra - ${subjectEl.value} - ${gradeEl.value}</title>
+                    <style>
+                        body { 
+                            font-family: 'Times New Roman', Times, serif; 
+                            font-size: 14pt; 
+                            line-height: 1.5;
+                            margin: 2cm; /* Giống lề Word */
+                        }
+                        h1, h2, h3 { margin-bottom: 0.5em; }
+                        ul, ol { padding-left: 40px; }
+                        strong { font-weight: bold; }
+                        em { font-style: italic; }
+                        br { display: block; content: ""; margin-bottom: 0.5em; }
+                    </style>
+                </head>
+                <body>
+                    ${htmlContent}
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            // Tạo tên file động
+            a.download = `de_kiem_tra_${subjectEl.value.replace(/ /g, '_')}_${gradeEl.value.replace(/ /g, '_')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage('success', 'Đang tải xuống file .html. Bạn có thể mở file này bằng Word.');
+        }
+
+        function handlePrint() {
+            const printWindow = window.open('', '', 'height=800,width=800');
+            printWindow.document.write('<html><head><title>In Đề kiểm tra</title>');
+            // Thêm style cơ bản để in
+            printWindow.document.write(`
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; }
+                    h1, h2, h3 { margin-bottom: 0.5em; }
+                    ul, ol { padding-left: 20px; }
+                </style>
+            `);
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(generatedContentEl.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus(); // Cần thiết cho một số trình duyệt
+            printWindow.print();
+        }
+
+    </script>
+</body>
+</html>
