@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ lý Tạo Đề kiểm tra (TT27)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- THÊM MỚI: Thư viện Marked.js để chuyển Markdown -> HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- THÊM MỚI: Thư viện MathJax để hiển thị công thức Toán -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .prose h1, .prose h2, .prose h3 {
+            font-weight: 700;
+        }
+        .prose ul { list-style-type: disc; margin-left: 1.5rem; }
+        .prose ol { list-style-type: decimal; margin-left: 1.5rem; }
+        .prose strong { font-weight: 700; }
+        .prose em { font-style: italic; }
+        .prose p { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+
+        /* Print styles */
+        @media print {
+            body {
+                background-color: #ffffff;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 12pt;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            .prose {
+                max-width: 100% !important;
+            }
+            /* Đảm bảo nội dung in không bị cắt lề */
+            @page {
+                margin: 0.75in;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 md:p-8">
+    <div class="w-full max-w-4xl mx-auto print-container">
+        <!-- Header -->
+        <header class="text-center mb-8 no-print">
+            <h1 class="text-3xl font-bold text-gray-800">Trợ lý Tạo Đề kiểm tra (TT27)</h1>
+            <p class="text-gray-600 mt-2">Dựa trên ma trận đề và Thông tư 27 của Bộ GD&ĐT Việt Nam</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Form Inputs (Left Column) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 no-print">
+                <form id="examForm" class="space-y-5">
+                    <!-- Môn học -->
+                    <div>
+                        <label for="subject" class="block text-sm font-semibold text-gray-700 mb-2">Môn học:</label>
+                        <select id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option value="Toán">Toán</option>
+                            <option value="Tiếng Việt">Tiếng Việt</option>
+                            <option value="Khoa học">Khoa học</option>
+                            <option value="Lịch sử và Địa lý">Lịch sử và Địa lý</option>
+                            <option value="Tin học">Tin học</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Công nghệ">Công nghệ</option>
+                        </select>
+                    </div>
+
+                    <!-- Lớp -->
+                    <div>
+                        <label for="grade" class="block text-sm font-semibold text-gray-700 mb-2">Lớp:</label>
+                        <select id="grade" name="grade" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option>Lớp 1</option>
+                            <option>Lớp 2</option>
+                            <option>Lớp 3</option>
+                            <option>Lớp 4</option>
+                            <option>Lớp 5</option>
+                        </select>
+                    </div>
+
+                    <!-- Đề kiểm tra -->
+                    <div>
+                        <label for="topic" class="block text-sm font-semibold text-gray-700 mb-2">Đề kiểm tra:</label>
+                        <select id="topic" name="topic" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option>Giữa học kỳ I</option>
+                            <option>Cuối học kỳ I</option>
+                            <option>Giữa học kỳ II</option>
+                            <option>Cuối học kỳ II</option>
+                        </select>
+                    </div>
+
+                    <!-- Hình thức kiểm tra -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Hình thức (chọn một hoặc nhiều):</label>
+                            <div id="examFormatCheckboxes" class="grid grid-cols-2 gap-3 mt-3">
+                                <!-- Checkbox 1: Trắc nghiệm -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="format-tn" name="examFormatCheckbox" value="Trắc nghiệm (Chọn đáp án)" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="format-tn" class="ml-2 text-sm text-gray-700">Trắc nghiệm</label>
+                                </div>
+                                <!-- Checkbox 2: Tự luận -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="format-tl" name="examFormatCheckbox" value="Tự luận (Viết câu trả lời)" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="format-tl" class="ml-2 text-sm text-gray-700">Tự luận</label>
+                                </div>
+                                <!-- Checkbox 3: Điền khuyết -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="format-dk" name="examFormatCheckbox" value="Điền khuyết (Điền vào chỗ trống)" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="format-dk" class="ml-2 text-sm text-gray-700">Điền khuyết</label>
+                                </div>
+                                <!-- Checkbox 4: Nối cột -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="format-nc" name="examFormatCheckbox" value="Nối cột (Ghép đôi)" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="format-nc" class="ml-2 text-sm text-gray-700">Nối cột</label>
+                                </div>
+                                <!-- Checkbox 5: Sắp xếp -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="format-sx" name="examFormatCheckbox" value="Sắp xếp (Từ, câu, thứ tự)" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="format-sx" class="ml-2 text-sm text-gray-700">Sắp xếp</label>
+                                </div>
+                                <!-- Checkbox 6: Đúng / Sai -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="format-ds" name="examFormatCheckbox" value="Đúng / Sai" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="format-ds" class="ml-2 text-sm text-gray-700">Đúng / Sai</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="numQuestions" class="block text-sm font-semibold text-gray-700 mb-2">Số câu (Tùy chọn):</label>
+                            <input type="number" id="numQuestions" name="numQuestions" min="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" placeholder="VD: 10">
+                        </div>
+                    </div>
+
+                    <!-- Ma trận -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="matrix" class="block text-sm font-semibold text-gray-700">Ma trận Đề kiểm tra:</label>
+                            <label for="fileUpload" class="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer">
+                                Tải file (.txt)
+                                <input type="file" id="fileUpload" class="hidden" accept=".txt">
+                            </label>
+                        </div>
+                        <textarea id="matrix" name="matrix" rows="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200" placeholder="Dán ma trận đề kiểm tra của bạn vào đây..."></textarea>
+                    </div>
+
+                    <!-- Nút Tạo đề -->
+                    <button type="button" id="generateButton" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-lg px-5 py-3.5 text-center transition duration-200 shadow-md">
+                        <span id="buttonText">Tạo Đề kiểm tra</span>
+                        <svg id="buttonSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results (Right Column) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center mb-4 no-print">
+                    <h2 class="text-xl font-bold text-gray-800">Kết quả Gợi ý:</h2>
+                    <div>
+                        <button type="button" id="downloadButton" class="text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 transition duration-200">
+                            Tải File (.html)
+                        </button>
+                        <button type="button" id="printButton" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition duration-200">
+                            In
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Message Box -->
+                <div id="messageBox" class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg hidden" role="alert">
+                    <!-- Error messages will appear here -->
+                </div>
+
+                <!-- Output Area -->
+                <div id="output" class="prose max-w-none border border-gray-200 rounded-lg p-4 min-h-[400px] overflow-y-auto">
+                    <p class="text-gray-500">Kết quả đề kiểm tra sẽ xuất hiện ở đây...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Element Selectors ---
+        const generateButtonEl = document.getElementById('generateButton');
+        const buttonTextEl = document.getElementById('buttonText');
+        const buttonSpinnerEl = document.getElementById('buttonSpinner');
+        const outputEl = document.getElementById('output');
+        const messageBoxEl = document.getElementById('messageBox');
+        const fileUploadEl = document.getElementById('fileUpload');
+        const matrixEl = document.getElementById('matrix');
+        const printButtonEl = document.getElementById('printButton');
+        const downloadButtonEl = document.getElementById('downloadButton');
+
+        // --- Gemini API Configuration ---
+        // Không cần API Key ở đây nữa, Vercel sẽ xử lý
+        const apiUrl = `/api/generate`; // Trỏ tới serverless function của Vercel
+
+        // --- Event Listeners ---
+        generateButtonEl.addEventListener('click', handleGenerateExam);
+        fileUploadEl.addEventListener('change', handleFileUpload);
+        printButtonEl.addEventListener('click', () => window.print());
+        downloadButtonEl.addEventListener('click', handleDownload);
+
+        // --- Helper Functions ---
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                generateButtonEl.disabled = true;
+                buttonTextEl.classList.add('hidden');
+                buttonSpinnerEl.classList.remove('hidden');
+            } else {
+                generateButtonEl.disabled = false;
+                buttonTextEl.classList.remove('hidden');
+                buttonSpinnerEl.classList.add('hidden');
+            }
+        }
+
+        function showMessage(message) {
+            if (message) {
+                messageBoxEl.textContent = message;
+                messageBoxEl.classList.remove('hidden');
+            } else {
+                messageBoxEl.classList.add('hidden');
+                messageBoxEl.textContent = '';
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    matrixEl.value = e.target.result;
+                };
+                reader.onerror = () => {
+                    showMessage('Không thể đọc file. Vui lòng thử lại.');
+                };
+                reader.readAsText(file);
+            } else if (file) {
+                showMessage('Chỉ chấp nhận file .txt. Vui lòng chọn lại.');
+                fileUploadEl.value = ''; // Reset input
+            }
+        }
+
+        function handleDownload() {
+            const subject = document.getElementById('subject').value;
+            const grade = document.getElementById('grade').value;
+            
+            // Tạo nội dung file HTML
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>De Kiem Tra</title>
+                    <style>
+                        body { 
+                            font-family: 'Times New Roman', Times, serif; 
+                            font-size: 13pt; 
+                            margin: 1in; 
+                        }
+                        h1, h2, h3 { font-weight: 700; }
+                        ul { list-style-type: disc; margin-left: 1.5rem; }
+                        ol { list-style-type: decimal; margin-left: 1.5rem; }
+                        strong { font-weight: 700; }
+                        em { font-style: italic; }
+                        p { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+                    </style>
+                </head>
+                <body>
+                    ${outputEl.innerHTML}
+                </body>
+                </html>
+            `;
+            
+            // Tạo một Blob (Binary Large Object)
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            
+            // Tạo một URL tạm thời cho Blob
+            const url = URL.createObjectURL(blob);
+            
+            // Tạo một thẻ <a> ẩn để kích hoạt tải về
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `De_Kiem_Tra_${subject}_${grade}.html`; // Tên file tải về
+            document.body.appendChild(a);
+            a.click();
+            
+            // Dọn dẹp
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * XÓA BỎ: Hàm simpleMarkdownToHtml(md) không còn cần thiết
+         * thư viện marked.js sẽ thay thế nó.
+         */
+        // function simpleMarkdownToHtml(md) { ... }
+
+        // --- Main Function ---
+
+        async function handleGenerateExam() {
+            // 1. Get all values from the form
+            const subject = document.getElementById('subject').value;
+            const grade = document.getElementById('grade').value;
+            const topic = document.getElementById('topic').value;
+            // const examFormat = document.getElementById('examFormat').value; // Dòng này không còn dùng nữa
+            const numQuestions = document.getElementById('numQuestions').value;
+            const matrix = document.getElementById('matrix').value;
+
+            // Lấy tất cả các checkbox hình thức đã được chọn
+            const checkedFormats = document.querySelectorAll('input[name="examFormatCheckbox"]:checked');
+            let selectedFormats = [];
+            checkedFormats.forEach((checkbox) => {
+                selectedFormats.push(checkbox.value);
+            });
+
+            // 2. Simple Validation
+            if (!matrix.trim()) {
+                showMessage('Vui lòng dán ma trận đề kiểm tra hoặc tải file .txt lên.');
+                return;
+            }
+
+            if (checkedFormats.length === 0) { // Thêm validation cho checkbox
+                showMessage('Vui lòng chọn ít nhất một hình thức câu hỏi.');
+                return;
+            }
+
+            const examFormat = selectedFormats.join(', '); // Gộp các lựa chọn
+
+            setLoading(true);
+            showMessage(''); // Clear previous errors
+            outputEl.innerHTML = '<p class="text-gray-500">Đang tạo đề, vui lòng chờ trong giây lát...</p>';
+
+            // 3. System Prompt (Instructions for the AI)
+            const systemPrompt = `
+                Bạn là một Trợ lý AI chuyên nghiệp, chuyên tạo ra các đề kiểm tra chất lượng cao cho giáo viên tiểu học tại Việt Nam.
+                Nghiêm túc tuân thủ các quy tắc sau:
+                1.  **Thông tư 27/2020/TT-BGDĐT:** Tất cả các câu hỏi và cấu trúc đề phải bám sát tinh thần của Thông tư 27, tập trung vào đánh giá năng lực và phẩm chất học sinh, giảm tải học thuộc lòng.
+                2.  **Định dạng đầu ra:** Xuất ra nội dung đề kiểm tra, phía dưới đề kiểm tra là đáp án chi tiết. Sử dụng Markdown cơ bản (in đậm, in nghiêng, danh sách) để định dạng rõ ràng. KHÔNG sử dụng lời chào, lời giới thiệu, hay lời kết. Chỉ tập trung vào nội dung đề.
+                3.  **Ngôn ngữ:** Tiếng Việt (trừ môn Tiếng Anh).
+                4.  **QUAN TRỌNG (MÔN TOÁN):** Nếu môn học là Toán, HÃY SỬ DỤNG định dạng LaTeX cho tất cả các ký hiệu toán học, phân số, công thức.
+                    - Phân số: Dùng $\\frac{1}{2}$ (sẽ hiển thị là 1/2)
+                    - Phép nhân: Dùng $3 \\times 4$ (sẽ hiển thị là 3x4)
+                    - Số thập phân: Dùng $0,5$ (theo chuẩn Việt Nam)
+                    - Đơn vị (độ C, m2): $10^{\circ}C$, $5m^2$
+                    - Bao bọc tất cả công thức inline bằng một dấu $...$ và công thức hiển thị riêng (display) bằng dấu $$...$$.
+                5.  **Bám sát yêu cầu:** Tạo đề dựa trên các thông tin được cung cấp.
+		6.  **Khi tạo câu trắc nghiệm, luôn trình bày 3 đáp án A, B, C đối với khối 1, 2, 3 và 4 đáp án A, B, C, D rõ ràng.
+            `;
+
+            // 4. User Query (The user's specific request)
+            const userQuery = `
+                Hãy tạo một đề kiểm tra dựa trên các thông tin sau:
+                - Môn học: ${subject}
+                - Lớp: ${grade}
+                - Chủ đề/Thời điểm: ${topic}
+                - Hình thức: ${examFormat}
+                ${numQuestions ? `- Tổng số câu (gợi ý): ${numQuestions}` : ''}
+                - Ma trận đề kiểm tra (quan trọng nhất, bám sát cấu trúc và phân bổ điểm/câu hỏi):
+                ---
+                ${matrix}
+                ---
+            `;
+
+            // 5. Construct Payload for Vercel Function
+            const payload = {
+                contents: [
+                    { parts: [{ text: userQuery }] }
+                ],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                tools: [{ "google_search": {} }] // Bật Google Search để tra cứu TT27 nếu cần
+            };
+
+            // 6. API Call to Vercel Serverless Function
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                // ----- PHẦN CẬP NHẬT CHẨN ĐOÁN LỖI -----
+                // Đọc nội dung JSON bất kể response.ok là true hay false
+                // Điều này cho phép chúng ta đọc thông báo lỗi chi tiết từ Google
+                const result = await response.json();
+
+                // Kiểm tra nếu response KHÔNG thành công (ví dụ: 403, 400, 500)
+                if (!response.ok) {
+                    console.error('Lỗi API từ Vercel/Google:', result);
+                    
+                    // Cố gắng lấy thông báo lỗi chi tiết từ Google
+                    // Ví dụ: "API key not valid." hoặc "Billing not enabled for project..."
+                    const detailedMessage = result?.error?.message || `API error: ${response.status}`;
+                    
+                    // Hiển thị thông báo lỗi chi tiết này cho người dùng
+                    showMessage(`Đã xảy ra lỗi: ${detailedMessage}`);
+                    
+                    setLoading(false);
+                    outputEl.innerHTML = '<p class="text-red-600">Không thể tạo đề kiểm tra. Vui lòng xem thông báo lỗi ở trên.</p>';
+                    return; // Dừng thực thi
+                }
+                // ----- KẾT THÚC PHẦN CẬP NHẬT -----
+
+
+                // 7. Process Successful Response (Chỉ chạy nếu response.ok là true)
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (text) {
+                    // SỬ DỤNG MARKED.JS ĐỂ CHUYỂN ĐỔI (thay thế simpleMarkdownToHtml)
+                    outputEl.innerHTML = marked.parse(text);
+                    
+                    // QUAN TRỌNG: Yêu cầu MathJax tìm và render công thức Toán
+                    // Phải gọi sau khi đã cập nhật innerHTML
+                    if (window.MathJax && window.MathJax.typesetPromise) {
+                        window.MathJax.typesetPromise([outputEl]).catch((err) => console.error('Lỗi render MathJax:', err));
+                    }
+                } else {
+                    console.error('Không có nội dung trả về:', result);
+                    showMessage('Đã xảy ra lỗi: AI không trả về nội dung. Vui lòng thử lại.');
+                    outputEl.innerHTML = '<p class="text-red-600">Không có nội dung được tạo.</p>';
+                }
+
+            } catch (error) {
+                // Lỗi này xảy ra nếu mạng bị ngắt hoặc không thể kết nối đến Vercel
+                console.error('Lỗi mạng hoặc lỗi fetch:', error);
+                showMessage(`Đã xảy ra lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.`);
+                outputEl.innerHTML = '<p class="text-red-600">Lỗi kết nối.</p>';
+            } finally {
+                setLoading(false);
+            }
+        }
+
+    </script>
+</body>
+</html>
